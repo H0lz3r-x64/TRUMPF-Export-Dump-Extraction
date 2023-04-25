@@ -21,13 +21,19 @@ def main():
         if re.match("^DA,.+'INTERNAL_DATA',420,.+", entry):
             result = entry.split(',')[8].replace("'", '')
             if len(result) > 0:
-                result_list.append([result, ''])
+                result_list.append([result, '', ''])
                 i += 1
 
         # Check if entry matches pattern for internal data with code 570
         if re.match("^DA,.+'INTERNAL_DATA',570,.+", entry):
             result = entry.split(',')[8].replace("'", '').rstrip(" min")
             result_list[i][1] = result
+
+            time = float(result)
+            m = int(time)
+            h = m / 60
+            s = int(time * 60)
+            result_list[i][2] = ":".join([format(h, "2"), format(m, "2"), format(s, "2")])
 
     # Write data to Excel file
     write_to_excel(result_list)
@@ -70,8 +76,8 @@ def write_to_excel(data: list[list[str]]):
     for i, value in enumerate([value for value in data if all(len(ele) > 0 for ele in value)]):
         i += 2
         worksheet.write('A' + str(i), value[0])
-        if value[1]:
-            worksheet.write('B' + str(i), format(float(value[1]), ".2f"))
+        worksheet.write('B' + str(i), format(float(value[1]), ".2f"))
+        worksheet.write('C' + str(i), value[2])
         worksheet.autofit()
 
     # Close workbook
